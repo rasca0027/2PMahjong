@@ -26,7 +26,7 @@
 
         <div class="form-group">
           <label for="room-num">Room ID</label>
-          <input type="text" class="form-control" id="room-num" aria-describedby="roomHelp">
+          <input type="text" class="form-control" id="room-num" aria-describedby="roomHelp" v-model="roomId">
         </div>
         <button type="button" class="button" v-on:click="joinGame">
           Join Game 
@@ -41,29 +41,66 @@
     <!-- development version, includes helpful console warnings -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-      var app = new Vue({
+      var socket = io()
+      var vue = new Vue({
         el: '#app',
         data: {
           message: 'Hello Vue!',
           state: 0,
-          socket: null
+          info: []
         },
-        mounted: function() {
-          this.socket = io.connect()
-          this.socket.on('connect', function() {
-            //socket.emit('join', 'Hello World from client');
-            console.log(this.socket.id)
+        created: function() {
+          socket.on('connect', () => {
+            console.log("socket connect")
+            this.message = "connect" + socket.id
           })
+          socket.on('gameStart', (data) => {
+            alert('game start')
+          })
+          socket.on('joined', (data) => {
+            this.info.push({
+              username: data,
+                type: 'joined'
+            });
+            setTimeout(() => {
+              this.info = [];
+            }, 5000);
+          });
         },
         methods: {
           newGame: function() {
             // post to newgame endpoint 
-            // if success, change state to 1
-            alert("a")
+            axios.post('/newgame', {
+              userId: socket.id
+            })
+              .then((result) => {
+                // if success, change state to 1
+                console.log(result) 
+                if (result.status === 'success') {
+                  this.message = 'successfully created room ' + result.room
+                  this.state = 1
+                }
+              })
+             .catch(function (error) {
+                console.log(error);
+              })
           },
           joinGame: function() {
-            alert("a")
+            let roomId = 
+            axios.post('/join', {
+              userId: socket.id,
+              room: roomId
+            })
+              .then((result) => {
+                if (result.status === 'no_such_room') {
+                  this.message = 'No suck room ID'
+                } else {
+                  this.message = 'Game start'
+                  this.state = 2
+                }
+              })
           }
         }
       })

@@ -3,6 +3,7 @@ var bodyParser = require('body-parser')
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+const routes = require('./routes.js')
 var mongoose = require('mongoose');
 var ss = require('seededshuffle');
 
@@ -31,62 +32,18 @@ const cards = [
 ]
 const dbUrl = 'mongodb+srv://admin:xhwir9rW4MYfKaQ@cluster0-q2y8k.mongodb.net/test?retryWrites=true&w=majority'
 
-const Game = mongoose.model('Game',{
-  room: String,
-  seed : String,
-  p1SocketId: String,
-  p2SocketId: String,
-  p1Discard: String,
-  p2Discard: String,
-  phase: Number // 0: not started, 1: A, 2: B, 3: end
-})
 
-app.get('/', (req, res) => {
-  return res.render('pages/index', {})   
-})
-
-app.get('/rooms', (req, res) => {
-  // show all rooms
-  var currentRooms = Game.find({ phase: 0 })
-  var nums = []
-  for (var i=0; i< currentRooms.length; i++) {
-    nums.push(currentRooms[i].room)
-  }
-  res.render('pages/index', {roomNums: nums})  
-})
-
-app.get('/room/', (req, res) => {
-  var shuffled = ss.shuffle(cards, '1234', true)
-    
-  res.send()
-})
-app.post('/newgame', (req, res) => {
-  let socketId = req.body.socketId
-  let roomId = Math.floor(Math.random() * 10000)
-  let seed = Math.random().toString(36).substring(8)
-  // create a new room and send 
-  let newGame = new Game({
-    p1SocketId: socketId,
-    room: roomId,
-    seed: randomSeed,
-    phase: 0
-  })
-  newGame.save()
-})
-app.post('/join', (req, res) => {
-  var roomNum = req.body.room
-  var existingGame = Game.find({ room : roomNum })
-  // if not exist, return error message
-    
-  // if exist, check
-})
-
-
-
-
-io.on('connection', (socket) =>{
+io.on('connection', (socket) => {
   console.log(`a user ${socket.id} is connected`)
+  socket.on('disconnect', (reason) => {
+        console.log(reason)
+  });
+  socket.on('join', (reason) => {
+        console.log(reason)
+  });
 })
+
+app.use('/', routes)
 
 mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } , (err) => {
   console.log('mongodb connected', err);
