@@ -1,16 +1,15 @@
-var express = require('express');
+var express = require('express')
 var bodyParser = require('body-parser')
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var app = express()
+var http = require('http').Server(app)
+var io = require('socket.io')(http)
 const routes = require('./routes.js')
-var mongoose = require('mongoose');
-var ss = require('seededshuffle');
+var mongoose = require('mongoose')
 
 app.set('view engine', 'ejs')
-app.use(express.static(__dirname));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}))
+app.use(express.static(__dirname))
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
 
 const cards = [
   '1s', '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s',

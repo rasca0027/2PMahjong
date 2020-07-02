@@ -49,6 +49,7 @@
         data: {
           message: 'Hello Vue!',
           state: 0,
+          roomId: '',
           info: []
         },
         created: function() {
@@ -78,8 +79,8 @@
               .then((result) => {
                 // if success, change state to 1
                 console.log(result) 
-                if (result.status === 'success') {
-                  this.message = 'successfully created room ' + result.room
+                if (result.data.status === 'success') {
+                  this.message = 'successfully created room ' + result.data.room
                   this.state = 1
                 }
               })
@@ -88,13 +89,12 @@
               })
           },
           joinGame: function() {
-            let roomId = 
             axios.post('/join', {
               userId: socket.id,
-              room: roomId
+              room: this.roomId
             })
               .then((result) => {
-                if (result.status === 'no_such_room') {
+                if (result.data.status === 'no_such_room') {
                   this.message = 'No suck room ID'
                 } else {
                   this.message = 'Game start'

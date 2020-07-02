@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { Game } = require('./models.js')
+const ss = require('seededshuffle')
 
 router.get('/', (req, res) => {
   return res.render('pages/index', {})   
@@ -50,6 +51,7 @@ router.post('/join', (req, res) => {
     // notify 1st player game is about to start
     var io = req.app.locals.io
     io.sockets.to(existingGame.p1SocketId).emit('startGame', '')
+    existingGame.save()
     return res.send({ status: 'start', parent: false }) //TODO figure out 親家子家
   }
 })
