@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 const http = require('http').Server(app)
+require('dotenv').config()
 const io = require('socket.io')(http)
 const routes = require('./routes.js')
 const mongoose = require('mongoose')
@@ -12,7 +13,7 @@ app.use(express.static(__dirname))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
-const dbUrl = 'mongodb+srv://admin:xhwir9rW4MYfKaQ@cluster0-q2y8k.mongodb.net/test?retryWrites=true&w=majority'
+const dbUrl = process.env.DBURL
 
 
 io.on('connection', (socket) => {
@@ -20,9 +21,9 @@ io.on('connection', (socket) => {
   socket.on('disconnect', (reason) => {
     console.log(reason)
   })
-  socket.on('gameStart', (socketId, seed) => {
+  socket.on('gameStart', (socketId, seed, cursor) => {
     let p1hand = getStartingHand(0, seed)
-    io.to(socketId).emit('gameStart', p1hand)
+    io.to(socketId).emit('gameStart', p1hand, cursor)
   })
 })
 

@@ -14,10 +14,10 @@ const cards = [
   '1.m', '2.m', '3.m', '4.m', '5.m', '6.m', '7.m', '8.m', '9.m',
   '1.m', '2.m', '3.m', '4.m', '5.m', '6.m', '7.m', '8.m', '9.m',
   '1.m', '2.m', '3.m', '4.m', '5.m', '6.m', '7.m', '8.m', '9.m',
-  'e', 's', 'w', 'n', 'pai', 'chong', 'fa',
-  'e', 's', 'w', 'n', 'pai', 'chong', 'fa',
-  'e', 's', 'w', 'n', 'pai', 'chong', 'fa',
-  'e', 's', 'w', 'n', 'pai', 'chong', 'fa',
+  'e', 's', 'w', 'n', 'haku', 'chun', 'hatsu',
+  'e', 's', 'w', 'n', 'haku', 'chun', 'hatsu',
+  'e', 's', 'w', 'n', 'haku', 'chun', 'hatsu',
+  'e', 's', 'w', 'n', 'haku', 'chun', 'hatsu',
 ]
 
 function getStartingHand(player, seed) {

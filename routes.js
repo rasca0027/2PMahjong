@@ -56,7 +56,6 @@ router.post('/join', (req, res) => {
       parent: false, //TODO figure out 親家子家
       hand: p2hand, 
       opponent: existingGame.p1SocketId,
-      cursor: 26,
       seed: existingGame.seed
     })   
   })

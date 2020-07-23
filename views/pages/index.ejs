@@ -39,10 +39,29 @@
 
       <div v-if="state === 2"> 
         Game start!
-        <p>Your hands: {{ hand }} </p>
-        <span style="border: 1px solid black" v-for="h in hand">
-          {{ h }}
-        </span>
+        <div>
+          <p>Your hands: {{ hand }} </p>
+          <span style="border: 1px solid black" v-for="h in hand">
+            {{ h }}
+          </span>
+          <span style="border: 1px solid black; margin-left: 15px">
+            {{ nextTile }}
+          </span>
+        </div>
+        <div>
+          <select name="chi" v-if="actions.chi">
+            <option v-for="s in actions.chiOptions" v-bind:key="s" v-bind:value="s"></option>
+          </select>
+          <button v-if="actions.chi">吃</button>    
+          <button v-if="actions.pon">碰</button>    
+          <button v-if="actions.kan">槓</button>    
+          <button v-if="actions.chi || actions.pon || actions.kan" @click="cancel">Do nothing</button>
+        </div>
+        <div>
+          <button>Discard</button>
+          <button v-if="tenpai">Tenpai (Enter phase 2)</button>
+          <button v-if="tenpai">Riichi (Enter phase 2)</button>
+        </div>
       </div>
     </div>
 
@@ -50,6 +69,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/seededshuffle@0.2.0/index.js"></script>
     <script>
       var socket = io()
       var vue = new Vue({
@@ -59,18 +79,24 @@
           state: 0,
           roomId: '',
           info: [],
-          hand: ''
+          cursor: 0,
+          hand: '',
+          nextTile: '',
+          discard: [],
+          tenpai: false,
+          actions: { chi: false, pon: false, kan: false, chiOptions: [] }
         },
         created: function() {
           socket.on('connect', () => {
             console.log("socket connect")
             this.message = "connect" + socket.id
           })
-          socket.on('gameStart', (data) => {
+          socket.on('gameStart', (data, cursor) => {
             console.log('game start')
             this.state = 2
             this.hand = data
-            this.executeMyTurn(true)
+            this.cursor = parseInt(cursor)
+            this.executeMyTurn(true, null)
           })
           socket.on('joined', (data) => {
             this.info.push({
@@ -108,18 +134,19 @@
               .then((result) => {
                 if (result.data.status === 'no_such_room') {
                   this.message = 'No such room ID'
-                } else {
+                } else if (result.data.status === 'start') {
                   this.message = 'Game start'
                   this.state = 2
                   this.hand = result.data.hand
                   // notify other player
                   let p1 = result.data.opponent
                   let seed = result.data.seed
-                  socket.emit('gameStart', p1, seed)
+                  this.cursor = 26
+                  socket.emit('gameStart', p1, seed, 26)
                 }
               })
           },
-          executeMyTurn: function(firstRound, lastTile, cursor) {
+          executeMyTurn: function(firstRound, lastTile) {
             function getOccurrence(arr, value) {
               let count = 0;
               arr.forEach((v) => (v === value && count ++));
@@ -151,30 +178,57 @@
               } 
               return possibleSets
             }
+            let doableActions = false
             if (!firstRound) { 
               // kan?
               if (getOccurrence(this.hand, lastTile) === 3) {
-                
+                this.actions.kan = true
+                doableActions = true
               }
               // pon?
               if (getOccurrence(this.hand, lastTile) === 2) {
+                this.actions.pon = true
+                doableActions = true
               }
               // chi?
               let possibleChiSets = getChiSets(lastTile)
               if (possibleChiSets.length > 0) {
-              
+                this.actions.chi = true
+                this.actions.chiOptions = possibleChiSets
+                doableActions = true
               }
             }
+            // if no doable actions, draw tile directly 
+            if (!doableActions) this.drawTile()
+          },
+          drawTile() {
+            function isTenpai() {
+              // TODO
+              return false
+            }
             // draw tile
-            let newTile = cards[cursor]
+            this.nextTile = this.tiles[this.cursor]
+            this.cursor += 1
             // tsumo?
             // added open kan / closed kan?
             // tenpai?
-            // if so, riichi?
-            // discard
+            if (isTenpai()) {
+              this.tenpai = true
+            }
+          },
+          cancel() {
+            this.actions = { chi: false, pon: false, kan: false, chiOptions: [] }
+            this.drawTile()
+          },
+          endTurn() {
+            // discard tile
             // hide all options
+            this.actions = { chi: false, pon: false, kan: false, chiOptions: [] }
+            this.tenpai = false
             // end, call next player's turn
+            socket.emit('yourTurn', this.discard, this.cursor)
           }
+
         }
       })
     </script>
