@@ -40,6 +40,9 @@
       <div v-if="state === 2"> 
         Game start!
         <p>Your hands: {{ hand }} </p>
+        <span style="border: 1px solid black" v-for="h in hand">
+          {{ h }}
+        </span>
       </div>
     </div>
 
@@ -67,6 +70,7 @@
             console.log('game start')
             this.state = 2
             this.hand = data
+            this.executeMyTurn(true)
           })
           socket.on('joined', (data) => {
             this.info.push({
@@ -114,6 +118,62 @@
                   socket.emit('gameStart', p1, seed)
                 }
               })
+          },
+          executeMyTurn: function(firstRound, lastTile, cursor) {
+            function getOccurrence(arr, value) {
+              let count = 0;
+              arr.forEach((v) => (v === value && count ++));
+              return count;
+            }
+            function getChiSets(value) {
+              let possibleSets = []
+              if (value.includes('.')) {
+                let n = parseInt(value.split('.')[0])
+                let kind = value.split('.')[1]
+                if (n <= 7) {
+                  let a = (n + 1).toString() + '.' + kind
+                  let b = (n + 2).toString() + '.' + kind
+                  if (this.hand.includes(a) && this.hand.includes(b)) 
+                    possibleSets.push([value, a, b])
+                } 
+                if (n >= 2 && n <= 8) {
+                  let a = (n - 1).toString() + '.' + kind
+                  let b = (n + 1).toString() + '.' + kind
+                  if (this.hand.includes(a) && this.hand.includes(b)) 
+                    possibleSets.push([a, value, b])
+                }
+                if (n >= 3) {
+                  let a = (n - 2).toString() + '.' + kind
+                  let b = (n - 1).toString() + '.' + kind
+                  if (this.hand.includes(a) && this.hand.includes(b)) 
+                    possibleSets.push([a, b, value])
+                }
+              } 
+              return possibleSets
+            }
+            if (!firstRound) { 
+              // kan?
+              if (getOccurrence(this.hand, lastTile) === 3) {
+                
+              }
+              // pon?
+              if (getOccurrence(this.hand, lastTile) === 2) {
+              }
+              // chi?
+              let possibleChiSets = getChiSets(lastTile)
+              if (possibleChiSets.length > 0) {
+              
+              }
+            }
+            // draw tile
+            let newTile = cards[cursor]
+            // tsumo?
+            // added open kan / closed kan?
+            // tenpai?
+            // if so, riichi?
+            // discard
+            // hide all options
+            // end, call next player's turn
           }
         }
       })
