@@ -1,10 +1,10 @@
-var express = require('express')
-var bodyParser = require('body-parser')
-var app = express()
-var http = require('http').Server(app)
-var io = require('socket.io')(http)
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
+const http = require('http').Server(app)
+const io = require('socket.io')(http)
 const routes = require('./routes.js')
-var mongoose = require('mongoose')
+const mongoose = require('mongoose')
 
 app.set('view engine', 'ejs')
 app.use(express.static(__dirname))
@@ -36,11 +36,14 @@ io.on('connection', (socket) => {
   console.log(`a user ${socket.id} is connected`)
   socket.on('disconnect', (reason) => {
         console.log(reason)
-  });
+  })
   socket.on('join', (reason) => {
         console.log(reason)
-  });
+  })
 })
+
+app.locals.io = io
+app.locals.cards = cards
 
 app.use('/', routes)
 
@@ -50,4 +53,4 @@ mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } , (e
 
 var server = http.listen(3001, () => {
   console.log('server is running on port', server.address().port);
-});
+})

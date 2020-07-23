@@ -17,7 +17,7 @@
     <div class="container" id="app">
       <h1>Hello, world!</h1>
 
-      <p>{{ message }} </p>
+      <p style="color: red">{{ message }} </p>
 
       <div v-if="state === 0">
         <button type="button" class="button" v-on:click="newGame">
@@ -36,6 +36,11 @@
       <div v-if="state === 1">
         Waiting for another player to join...
       </div>
+
+      <div v-if="state === 2"> 
+        Game start!
+        <p>Your hands: {{ hand }} </p>
+      </div>
     </div>
 
     <!-- development version, includes helpful console warnings -->
@@ -50,7 +55,8 @@
           message: 'Hello Vue!',
           state: 0,
           roomId: '',
-          info: []
+          info: [],
+          hand: ''
         },
         created: function() {
           socket.on('connect', () => {
@@ -59,6 +65,7 @@
           })
           socket.on('gameStart', (data) => {
             alert('game start')
+            this.state = 2
           })
           socket.on('joined', (data) => {
             this.info.push({
@@ -95,21 +102,16 @@
             })
               .then((result) => {
                 if (result.data.status === 'no_such_room') {
-                  this.message = 'No suck room ID'
+                  this.message = 'No such room ID'
                 } else {
                   this.message = 'Game start'
                   this.state = 2
+                  this.hand = result.data.hand
                 }
               })
           }
         }
       })
-
-
-      /*  socket.on('broad', function(data) {
-              $('#future').append(data+ "<br/>");
-        });
-        */
     </script>
   </body>
 </html>
