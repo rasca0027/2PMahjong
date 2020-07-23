@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const { Game } = require('./models.js')
-const ss = require('seededshuffle')
+const { getStartingHand } = require('./utils.js')
+
 
 router.get('/', (req, res) => {
   return res.render('pages/index', {})   
@@ -23,7 +24,7 @@ router.get('/room/', (req, res) => {
 })
 
 router.post('/newgame', (req, res) => {
-  let socketId = req.body.socketId
+  let socketId = req.body.userId
   let roomId = Math.floor(Math.random() * 10000)
   let randomSeed = Math.random().toString(36).substring(8)
   // create a new room and send 
@@ -48,16 +49,19 @@ router.post('/join', (req, res) => {
     }
     // if exist, join as 2nd player
     existingGame.p2SocketId = req.body.socketId
-    var shuffled = ss.shuffle(req.app.locals.cards, existingGame.seed, true)
-    // TODO: notify 1st player game is about to start
-    var io = req.app.locals.io
-    io.sockets.to(existingGame.p1SocketId).emit('startGame', '')
     existingGame.save()
-    return res.send({ status: 'start', parent: false, hand: shuffled }) //TODO figure out 親家子家
+    let p2hand = getStartingHand(1, existingGame.seed)
+    return res.send({ 
+      status: 'start', 
+      parent: false, //TODO figure out 親家子家
+      hand: p2hand, 
+      opponent: existingGame.p1SocketId,
+      cursor: 26,
+      seed: existingGame.seed
+    })   
   })
   .catch((err) => {
     console.log(err)
-    // if other error, return general error message
     return res.send({'status': 'error'})
   })
 })

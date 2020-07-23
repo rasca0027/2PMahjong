@@ -64,8 +64,9 @@
             this.message = "connect" + socket.id
           })
           socket.on('gameStart', (data) => {
-            alert('game start')
+            console.log('game start')
             this.state = 2
+            this.hand = data
           })
           socket.on('joined', (data) => {
             this.info.push({
@@ -107,6 +108,10 @@
                   this.message = 'Game start'
                   this.state = 2
                   this.hand = result.data.hand
+                  // notify other player
+                  let p1 = result.data.opponent
+                  let seed = result.data.seed
+                  socket.emit('gameStart', p1, seed)
                 }
               })
           }
