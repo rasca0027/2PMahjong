@@ -6,7 +6,7 @@ require('dotenv').config()
 const io = require('socket.io')(http)
 const routes = require('./routes.js')
 const mongoose = require('mongoose')
-const { getStartingHand } = require('./utils.js')
+const { getStartingHand, getAllTiles } = require('./utils.js')
 
 app.set('view engine', 'ejs')
 app.use(express.static(__dirname))
@@ -23,7 +23,8 @@ io.on('connection', (socket) => {
   })
   socket.on('gameStart', (socketId, seed, cursor) => {
     let p1hand = getStartingHand(0, seed)
-    io.to(socketId).emit('gameStart', p1hand, cursor)
+    let tiles = getAllTiles(seed)
+    io.to(socketId).emit('gameStart', p1hand, cursor, tiles)
   })
 })
 

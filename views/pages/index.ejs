@@ -41,7 +41,7 @@
         Game start!
         <div>
           <p>Your hands: {{ hand }} </p>
-          <span style="border: 1px solid black" v-for="h in hand">
+          <span style="border: 1px solid black" v-for="(h, index) in hand" @click="select(index)">
             {{ h }}
           </span>
           <span style="border: 1px solid black; margin-left: 15px">
@@ -58,7 +58,7 @@
           <button v-if="actions.chi || actions.pon || actions.kan" @click="cancel">Do nothing</button>
         </div>
         <div>
-          <button>Discard</button>
+          <button @click="discardTile">Discard</button>
           <button v-if="tenpai">Tenpai (Enter phase 2)</button>
           <button v-if="tenpai">Riichi (Enter phase 2)</button>
         </div>
@@ -69,7 +69,6 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://unpkg.com/seededshuffle@0.2.0/index.js"></script>
     <script>
       var socket = io()
       var vue = new Vue({
@@ -78,8 +77,10 @@
           message: 'Hello Vue!',
           state: 0,
           roomId: '',
+          selectedIndex: -1,
           info: [],
           cursor: 0,
+          tiles: [],
           hand: '',
           nextTile: '',
           discard: [],
@@ -91,11 +92,12 @@
             console.log("socket connect")
             this.message = "connect" + socket.id
           })
-          socket.on('gameStart', (data, cursor) => {
+          socket.on('gameStart', (data, cursor, allTiles) => {
             console.log('game start')
             this.state = 2
             this.hand = data
             this.cursor = parseInt(cursor)
+            this.tiles = allTiles
             this.executeMyTurn(true, null)
           })
           socket.on('joined', (data) => {
@@ -115,8 +117,6 @@
               userId: socket.id
             })
               .then((result) => {
-                // if success, change state to 1
-                console.log(result) 
                 if (result.data.status === 'success') {
                   this.message = 'successfully created room ' + result.data.room
                   this.state = 1
@@ -138,10 +138,11 @@
                   this.message = 'Game start'
                   this.state = 2
                   this.hand = result.data.hand
+                  this.cursor = 26
+                  this.tiles = result.data.allTiles
                   // notify other player
                   let p1 = result.data.opponent
                   let seed = result.data.seed
-                  this.cursor = 26
                   socket.emit('gameStart', p1, seed, 26)
                 }
               })
@@ -219,9 +220,21 @@
           cancel() {
             this.actions = { chi: false, pon: false, kan: false, chiOptions: [] }
             this.drawTile()
+            this.selectedIndex = -1
           },
-          endTurn() {
+          select(i) {
+            console.log('selected ' + i)
+            this.selectedIndex = i
+          },
+          discardTile() {
+            if (this.selectedIndex === -1) {
+              alert('please select a tile')
+              return
+            }
             // discard tile
+            this.discard.push(this.selectedIndex)
+            this.hand.splice(this.selectedIndex, 1)
+            this.selectedIndex = -1
             // hide all options
             this.actions = { chi: false, pon: false, kan: false, chiOptions: [] }
             this.tenpai = false

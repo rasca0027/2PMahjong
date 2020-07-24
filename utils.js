@@ -21,7 +21,6 @@ const cards = [
 ]
 
 function getStartingHand(player, seed) {
-
   let shuffled = ss.shuffle(cards, seed, true)
   let hand = []
   if (player === 0) {
@@ -40,4 +39,10 @@ function getStartingHand(player, seed) {
   return hand
 }
 
+function getAllTiles(seed) {
+  let shuffled = ss.shuffle(cards, seed, true)
+  return shuffled
+}
+
 exports.getStartingHand = getStartingHand
+exports.getAllTiles = getAllTiles

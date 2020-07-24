@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { Game } = require('./models.js')
-const { getStartingHand } = require('./utils.js')
+const { getStartingHand, getAllTiles } = require('./utils.js')
 
 
 router.get('/', (req, res) => {
@@ -51,11 +51,13 @@ router.post('/join', (req, res) => {
     existingGame.p2SocketId = req.body.socketId
     existingGame.save()
     let p2hand = getStartingHand(1, existingGame.seed)
+    let tiles = getAllTiles(existingGame.seed)
     return res.send({ 
       status: 'start', 
       parent: false, //TODO figure out 親家子家
       hand: p2hand, 
       opponent: existingGame.p1SocketId,
+      allTiles: tiles,
       seed: existingGame.seed
     })   
   })
