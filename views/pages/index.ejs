@@ -104,11 +104,11 @@
             this.info.push({
               username: data,
                 type: 'joined'
-            });
+            })
             setTimeout(() => {
-              this.info = [];
-            }, 5000);
-          });
+              this.info = []
+            }, 5000)
+          })
         },
         methods: {
           newGame: function() {
@@ -123,7 +123,7 @@
                 }
               })
              .catch(function (error) {
-                console.log(error);
+                console.log(error)
               })
           },
           joinGame: function() {
@@ -149,9 +149,9 @@
           },
           executeMyTurn: function(firstRound, lastTile) {
             function getOccurrence(arr, value) {
-              let count = 0;
-              arr.forEach((v) => (v === value && count ++));
-              return count;
+              let count = 0
+              arr.forEach((v) => (v === value && count ++))
+              return count
             }
             function getChiSets(value) {
               let possibleSets = []
@@ -215,6 +215,7 @@
             // tenpai?
             if (isTenpai()) {
               this.tenpai = true
+              // can i riichi 
             }
           },
           cancel() {
