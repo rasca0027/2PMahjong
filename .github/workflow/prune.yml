@@ -1,0 +1,22 @@
+# This workflow deletes old branches that are not associated with open PRs.
+name: Delete stale branches 
+
+on: workflow_dispatch
+
+jobs:
+  prune_old_branches:
+
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install PyGithub
+    - run: python prune_old_branches.py --access_token=${{ secrets.GITHUB_TOKEN }}
