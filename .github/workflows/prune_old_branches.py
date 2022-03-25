@@ -12,7 +12,7 @@ def prune_stale_branches(access_token: str) -> None:
     """Find all isolated stale branches and delete them."""
 
     github_inst = github.Github(access_token)
-    repo = github_inst.get_repo('petal-engineering/shared')
+    repo = github_inst.get_repo('rasca0027/Mahjong4RL')
 
     branches_to_delete = []
     for branch in repo.get_branches():
